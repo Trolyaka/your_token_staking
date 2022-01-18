@@ -48,6 +48,11 @@ impl Processor {
                 msg!("Instruction::ClaimRewards");
                 process_claim_rewards(accounts, program_id)
             }
+
+            Instruction::Custom {} => {
+                msg!("Instruction::Custom");
+                Ok(())
+            }
         }
     }
 }
