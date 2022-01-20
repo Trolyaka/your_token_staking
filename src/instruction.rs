@@ -16,6 +16,8 @@ pub enum Instruction {
         amount_to_withdraw: u64,
     },
     ClaimRewards {},
+    ClosePool {},
+    CloseUser {},
 }
 
 impl Instruction {
@@ -34,6 +36,10 @@ impl Instruction {
             },
 
             4 => Self::ClaimRewards {},
+
+            8 => Self::ClosePool {},
+
+            9 => Self::CloseUser {},
 
             _ => return Err(InvalidInstruction.into()),
         })

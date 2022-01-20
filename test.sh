@@ -3,8 +3,7 @@
 set -e
 
 ./deploy-localnet.sh
-cd interface
+cd front
 npm i
-npm run build
 npm run test
-npm run lint
+
