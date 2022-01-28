@@ -7,16 +7,18 @@ use crate::{
     },
 };
 
+
 use borsh::{BorshDeserialize, BorshSerialize};
+use bv::Bits;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
-    program::invoke_signed,
     program_error::ProgramError,
     pubkey::Pubkey,
     sysvar::clock::Clock,
     sysvar::Sysvar,
+    slot_history::SlotHistory
 };
 
 pub fn process_unstake(
@@ -97,6 +99,7 @@ pub fn process_unstake(
         return Err(CustomError::InsufficientFundsToUnstake.into());
     }
 
+    Clock::get()?.slot; // store into user account need for formula (this is aka 'block')
     let now = Clock::get()?.unix_timestamp as i64;
 
     user_storage_data.unstake_pending = amount_to_withdraw;
