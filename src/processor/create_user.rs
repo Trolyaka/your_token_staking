@@ -16,7 +16,7 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
     system_instruction, system_program,
-    sysvar::{rent::Rent, Sysvar},
+    sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
 use std::convert::TryInto;
 
@@ -83,6 +83,7 @@ pub fn process_create_user(
         your_pool: *your_pool_storage_account.key,
         balance_your_staked: 0u64,
         unstake_pending: 0u64,
+        last_time_claimed_slot: Clock::get()?.slot,
         unstake_pending_date: 0i64,
         nonce: bump_seed,
         claim_timeout_date: 0i64,

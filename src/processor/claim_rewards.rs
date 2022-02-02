@@ -99,9 +99,23 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         return Err(CustomError::InvalidStakingVault.into());
     }
 
+    let reward_per_block = 2;
+    let current_slot = Clock::get()?.slot;
+
+    let reward_amount = (reward_per_block
+        * (current_slot - user_storage_data.last_time_claimed_slot)
+        * user_storage_data.balance_your_staked)
+        / your_pool_data.total_stake;
+
+    if reward_amount == 0 {
+        msg!("CustomError::UserRewardToClaimIsZero");
+        return Err(CustomError::UserRewardToClaimIsZero.into());
+    }
+
     let now = Clock::get()?.unix_timestamp as i64;
     if user_storage_data.claim_timeout_date <= now || user_storage_data.claim_timeout_date == 0 {
         msg!("Calling the token program to transfer YOUR to User from Rewards Vault...");
+        msg!("Reward amount: {}", reward_amount);
         invoke_signed(
             &spl_token::instruction::transfer(
                 token_program.key,
@@ -109,7 +123,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
                 user_rewards_ata.key,
                 &pool_signer_address,
                 &[&pool_signer_address],
-                2,
+                reward_amount,
             )?,
             &[
                 your_rewards_vault.clone(),
@@ -121,6 +135,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         )?;
 
         user_storage_data.claim_timeout_date = now + 86400; // in seconds
+        user_storage_data.last_time_claimed_slot = current_slot;
     } else {
         msg!("CustomError::UserClaimRewardTimeout");
         return Err(CustomError::UserClaimRewardTimeout.into());
