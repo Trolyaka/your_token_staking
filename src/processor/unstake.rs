@@ -7,9 +7,7 @@ use crate::{
     },
 };
 
-
 use borsh::{BorshDeserialize, BorshSerialize};
-use bv::Bits;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
@@ -18,7 +16,6 @@ use solana_program::{
     pubkey::Pubkey,
     sysvar::clock::Clock,
     sysvar::Sysvar,
-    slot_history::SlotHistory
 };
 
 pub fn process_unstake(
@@ -64,7 +61,7 @@ pub fn process_unstake(
         return Err(CustomError::DataSizeNotMatched.into());
     }
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
-    let your_pool_data: YourPool =
+    let mut your_pool_data: YourPool =
         YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
             .unwrap();
     if your_pool_data.acc_type != AccTypesWithVersion::YourPoolDataV1 as u8 {
@@ -99,10 +96,10 @@ pub fn process_unstake(
         return Err(CustomError::InsufficientFundsToUnstake.into());
     }
 
-    Clock::get()?.slot; // store into user account need for formula (this is aka 'block')
-    let now = Clock::get()?.unix_timestamp as i64;
-
+    your_pool_data.total_stake -= amount_to_withdraw;
     user_storage_data.unstake_pending = amount_to_withdraw;
+
+    let now = Clock::get()?.unix_timestamp as i64;
     user_storage_data.unstake_pending_date = now + 2; // pending for 2 seconds
     msg!("Moved amount to pending");
 

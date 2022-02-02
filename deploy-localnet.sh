@@ -7,7 +7,7 @@ PAYER_KEYPAIR_FILE=payer-keypair.json
 PROGRAM_KEYPAIR_FILE=program-keypair.json
 ADMIN_KEYPAIR_FILE=admin-keypair.json
 
-solana-test-validator> /dev/null 2>&1 &
+./solana-test-validator> /dev/null 2>&1 &
 VALIDATOR_PID=$!
 echo "VALIDATOR_PID"
 echo $VALIDATOR_PID

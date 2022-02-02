@@ -57,7 +57,7 @@ pub fn process_stake(
         return Err(CustomError::DataSizeNotMatched.into());
     }
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
-    let your_pool_data: YourPool =
+    let mut your_pool_data: YourPool =
         YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
             .unwrap();
     if your_pool_data.acc_type != AccTypesWithVersion::YourPoolDataV1 as u8 {
@@ -116,6 +116,9 @@ pub fn process_stake(
             token_program.clone(),
         ],
     )?;
+
+    your_pool_data.total_stake += amount_to_deposit;
+
     user_storage_data.balance_your_staked = user_storage_data
         .balance_your_staked
         .checked_add(amount_to_deposit)
