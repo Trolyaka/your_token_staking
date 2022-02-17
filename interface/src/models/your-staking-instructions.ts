@@ -6,5 +6,6 @@ export enum YourStakingInstructions {
   ClaimRewards = 4,
   ClosePool = 5,
   CloseUser = 6,
-  FinalUnstake = 7
+  FinalUnstake = 7,
+  UpdateRates = 8,
 }

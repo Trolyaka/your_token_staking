@@ -17,8 +17,13 @@ import {
     rewardDurationInDays,
 
 } from "./prepereTestsEvironment";
-import {sendAndConfirmTransaction} from "@solana/web3.js";
+import {sendAndConfirmTransaction, SystemProgram, Transaction, TransactionInstruction} from "@solana/web3.js";
 import {finalUnstakeYourTransaction} from "../src/transactions/final-unstake-your-transaction";
+import {createUpdateRatesTransaction} from "../src/transactions/update_rates_transaction";
+import {getUserStorageAccountWithNonce} from "../src/utils";
+import {Pubkeys} from "../src/constants";
+import {YourStakingInstructions} from "../src/models";
+import BN from "bn.js";
 
 setupTest();
 
@@ -44,6 +49,12 @@ describe('Your Token Staking Tests', () => {
             yourStakingVault,
             yourRewardsVault,
         ]);
+    });
+
+    test('Change Rates', async () => {
+        const connection = ConnectionService.getConnection();
+        const createUpdateRatesTx = await createUpdateRatesTransaction(adminAccount.publicKey, 11, 15, 18);
+        await sendAndConfirmTransaction(connection, createUpdateRatesTx, [adminAccount]);
     });
 
     test('Create User', async () => {

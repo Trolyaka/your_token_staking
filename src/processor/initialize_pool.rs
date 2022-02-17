@@ -172,6 +172,9 @@ pub fn process_initialize_your_pool(
     your_pool_data.user_stake_count = 0u32;
     your_pool_data.pda_nonce = bump_seed;
     your_pool_data.reward_duration_end = 0u64;
+    your_pool_data.rewards_per_slot = 0u64;
+    your_pool_data.max_reward_rate = 0u64;
+    your_pool_data.min_reward_rate = 0u64;
 
     //your_pool_data.user_stake_count += 1u32; // TODO: Think on it
 
