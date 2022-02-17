@@ -1,8 +1,9 @@
+use std::borrow::BorrowMut;
 use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
+        AccTypesWithVersion, User, YourPool, EPOCH_LENGTH, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
 };
@@ -16,6 +17,8 @@ use solana_program::{
     program_error::ProgramError,
     program_pack::Pack,
     pubkey::Pubkey,
+    sysvar::clock::Clock,
+    sysvar::Sysvar,
 };
 use spl_token::state::Account as TokenAccount;
 
@@ -116,6 +119,18 @@ pub fn process_stake(
             token_program.clone(),
         ],
     )?;
+
+    let epoch_start_timestamp = Clock::get()?.epoch_start_timestamp as f64;
+    let current_time_timestamp = Clock::get()?.unix_timestamp as f64;
+
+    let (mut user_weighted_stake, mut user_weighted_epoch_id) = &user_storage_data.weights;
+    user_weighted_stake = (current_time_timestamp - epoch_start_timestamp) / EPOCH_LENGTH as f64;
+    user_weighted_epoch_id = Clock::get()?.slot;
+
+    msg!("1: {:?}", user_storage_data.weights);
+
+    return Err(CustomError::AccountOwnerShouldBeTokenProgram.into());
+
     user_storage_data.balance_your_staked = user_storage_data
         .balance_your_staked
         .checked_add(amount_to_deposit)
