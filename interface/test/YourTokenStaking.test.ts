@@ -41,7 +41,7 @@ describe('Your Token Staking Tests', () => {
             yourStakingVault,
             yourRewardsVault,
             rewardDurationInDays,
-            10000
+            1000000000000
         );
         await sendAndConfirmTransaction(connection, initializePoolTx, [
             adminAccount,
@@ -53,7 +53,7 @@ describe('Your Token Staking Tests', () => {
 
     test('Change Rates', async () => {
         const connection = ConnectionService.getConnection();
-        const createUpdateRatesTx = await createUpdateRatesTransaction(adminAccount.publicKey, 11, 15, 18);
+        const createUpdateRatesTx = await createUpdateRatesTransaction(adminAccount.publicKey, 2, 550, 230);
         await sendAndConfirmTransaction(connection, createUpdateRatesTx, [adminAccount]);
     });
 

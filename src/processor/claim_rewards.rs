@@ -2,9 +2,10 @@ use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
+        AccTypesWithVersion, User, YourPool, EPOCH_LENGTH, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
+    utils,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
@@ -101,6 +102,42 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
 
     let now = Clock::get()?.unix_timestamp as i64;
     if user_storage_data.claim_timeout_date <= now || user_storage_data.claim_timeout_date == 0 {
+        let max_reward_rate = your_pool_data.max_reward_rate as f64 / 10000.0;
+        let min_reward_rate = your_pool_data.min_reward_rate as f64 / 10000.0;
+        let rewards_per_slot = your_pool_data.rewards_per_slot;
+        let total_weighted_stake = your_pool_data.total_weighted_stake;
+        let user_weighted_stake = user_storage_data.user_weighted_stake;
+        let unclaimed_epochs =
+            ((now - user_storage_data.user_weighted_epoch) / EPOCH_LENGTH as i64) as u64;
+        let total_stake = your_pool_data.user_total_stake as f64;
+        let user_stake = user_storage_data.balance_your_staked as f64;
+
+        let mut reward_amount = user_weighted_stake
+            * utils::min(
+                max_reward_rate,
+                utils::max(
+                    min_reward_rate,
+                    rewards_per_slot as f64 * EPOCH_LENGTH as f64 / total_weighted_stake as f64,
+                ),
+            );
+
+        if user_storage_data.user_weighted_epoch != Clock::get()?.epoch_start_timestamp {
+            reward_amount += unclaimed_epochs as f64
+                * user_stake
+                * utils::min(
+                    max_reward_rate,
+                    utils::max(
+                        min_reward_rate,
+                        rewards_per_slot as f64 * EPOCH_LENGTH as f64 / total_stake,
+                    ),
+                );
+        }
+
+        if reward_amount as u64 == 0 {
+            msg!("CustomError::UserRewardToClaimIsZero");
+            return Err(CustomError::UserRewardToClaimIsZero.into());
+        }
+
         msg!("Calling the token program to transfer YOUR to User from Rewards Vault...");
         invoke_signed(
             &spl_token::instruction::transfer(
@@ -109,7 +146,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
                 user_rewards_ata.key,
                 &pool_signer_address,
                 &[&pool_signer_address],
-                2,
+                reward_amount as u64,
             )?,
             &[
                 your_rewards_vault.clone(),

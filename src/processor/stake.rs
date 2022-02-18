@@ -135,12 +135,12 @@ pub fn process_stake(
         1.0 - (current_time_timestamp - epoch_start_timestamp) / (EPOCH_LENGTH as f64);
 
     // For current user
-    user_storage_data.user_weighted_stake = (user_stake_balance * current_epoch_coefficient);
+    user_storage_data.user_weighted_stake = user_stake_balance * current_epoch_coefficient;
     user_storage_data.user_weighted_epoch = Clock::get()?.epoch_start_timestamp as i64;
 
     // Same for pool
     let pool_total_stake = your_pool_data.user_total_stake as f64;
-    your_pool_data.total_weighted_stake = (pool_total_stake * current_epoch_coefficient);
+    your_pool_data.total_weighted_stake = pool_total_stake * current_epoch_coefficient;
     your_pool_data.weighted_epoch_id = Clock::get()?.epoch_start_timestamp as i64;
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]

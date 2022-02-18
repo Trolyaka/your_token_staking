@@ -1,10 +1,6 @@
 use crate::{
     error::CustomError,
-    processor::create_user::get_user_storage_address_and_bump_seed,
-    state::{
-        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
-        YOUR_POOL_STORAGE_TOTAL_BYTES,
-    },
+    state::{YourPool, YOUR_POOL_STORAGE_TOTAL_BYTES},
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -12,11 +8,8 @@ use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
-    program::invoke_signed,
     program_error::ProgramError,
     pubkey::Pubkey,
-    sysvar::clock::Clock,
-    sysvar::Sysvar,
 };
 
 pub fn process_update_rates(

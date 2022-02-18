@@ -70,6 +70,9 @@ pub enum CustomError {
     // Pool Address Already Initialized
     #[error("User final unstake timeout didn't expired")]
     UserFinalUnstakeTimeout,
+    // User claim reward amount is Zero
+    #[error("User claim reward amount is Zero")]
+    UserRewardToClaimIsZero,
 }
 
 impl From<CustomError> for ProgramError {

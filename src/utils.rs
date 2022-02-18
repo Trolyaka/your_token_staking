@@ -80,3 +80,18 @@ pub fn last_time_reward_applicable(reward_duration_end: u64, now_unix_timestamp:
     return std::cmp::min(now_unix_timestamp.try_into().unwrap(), reward_duration_end);
 }
 
+pub fn min(f1: f64, f2: f64) -> f64 {
+    if f1 < f2 {
+        f1
+    } else {
+        f2
+    }
+}
+
+pub fn max(f1: f64, f2: f64) -> f64 {
+    if f1 > f2 {
+        f1
+    } else {
+        f2
+    }
+}
