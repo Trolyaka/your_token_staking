@@ -86,7 +86,7 @@ pub fn process_create_user(
         unstake_pending_date: 0i64,
         nonce: bump_seed,
         claim_timeout_date: 0i64,
-        user_weighted_epoch_id: 0u64,
+        user_weighted_epoch: 0i64,
         user_weighted_stake: 0f64
     };
 

@@ -59,7 +59,7 @@ pub fn process_stake(
         return Err(CustomError::DataSizeNotMatched.into());
     }
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
-    let your_pool_data: YourPool =
+    let mut your_pool_data: YourPool =
         YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
             .unwrap();
     if your_pool_data.acc_type != AccTypesWithVersion::YourPoolDataV1 as u8 {
@@ -123,14 +123,25 @@ pub fn process_stake(
         .balance_your_staked
         .checked_add(amount_to_deposit)
         .ok_or(CustomError::AmountOverflow)?;
+    your_pool_data.user_total_stake = your_pool_data
+        .user_total_stake
+        .checked_add(amount_to_deposit)
+        .ok_or(CustomError::AmountOverflow)?;
 
     let epoch_start_timestamp = Clock::get()?.epoch_start_timestamp as f64;
     let current_time_timestamp = Clock::get()?.unix_timestamp as f64;
     let user_stake_balance = user_storage_data.balance_your_staked as f64;
+    let current_epoch_coefficient =
+        1.0 - (current_time_timestamp - epoch_start_timestamp) / (EPOCH_LENGTH as f64);
 
-    user_storage_data.user_weighted_stake = (user_stake_balance
-        * ((current_time_timestamp - epoch_start_timestamp) / (EPOCH_LENGTH as f64)));
-    user_storage_data.user_weighted_epoch_id = Clock::get()?.slot;
+    // For current user
+    user_storage_data.user_weighted_stake = (user_stake_balance * current_epoch_coefficient);
+    user_storage_data.user_weighted_epoch = Clock::get()?.epoch_start_timestamp as i64;
+
+    // Same for pool
+    let pool_total_stake = your_pool_data.user_total_stake as f64;
+    your_pool_data.total_weighted_stake = (pool_total_stake * current_epoch_coefficient);
+    your_pool_data.weighted_epoch_id = Clock::get()?.epoch_start_timestamp as i64;
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
