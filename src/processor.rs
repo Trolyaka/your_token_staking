@@ -4,7 +4,7 @@ use {
     claim_rewards::process_claim_rewards, close_pool::process_close_pool,
     close_user::process_close_user, create_user::process_create_user,
     final_unstake::process_final_unstake, initialize_pool::process_initialize_your_pool,
-    stake::process_stake, unstake::process_unstake,
+    stake::process_stake, unstake::process_unstake, update_rates::process_update_rates,
 };
 
 pub mod claim_rewards;
@@ -15,6 +15,7 @@ pub mod final_unstake;
 pub mod initialize_pool;
 pub mod stake;
 pub mod unstake;
+pub mod update_rates;
 
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
@@ -74,6 +75,21 @@ impl Processor {
             Instruction::FinalUnstake {} => {
                 msg!("Instruction::FinalUnstake");
                 process_final_unstake(accounts, program_id)
+            }
+
+            Instruction::UpdateRates {
+                rewards_per_slot,
+                max_reward_rate,
+                min_reward_rate,
+            } => {
+                msg!("Instruction::UpdateRates");
+                process_update_rates(
+                    accounts,
+                    program_id,
+                    rewards_per_slot,
+                    max_reward_rate,
+                    min_reward_rate,
+                )
             }
         }
     }

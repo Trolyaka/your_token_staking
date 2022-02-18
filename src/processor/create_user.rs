@@ -86,6 +86,8 @@ pub fn process_create_user(
         unstake_pending_date: 0i64,
         nonce: bump_seed,
         claim_timeout_date: 0i64,
+        user_weighted_epoch: 0i64,
+        user_weighted_stake: 0f64
     };
 
     let mut user_data_byte_array = user_storage_account.data.try_borrow_mut().unwrap();

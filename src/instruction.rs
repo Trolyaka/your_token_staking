@@ -20,6 +20,11 @@ pub enum Instruction {
     ClosePool {},
     CloseUser {},
     FinalUnstake {},
+    UpdateRates {
+        rewards_per_slot: u64,
+        max_reward_rate: u64,
+        min_reward_rate: u64,
+    },
 }
 
 impl Instruction {
@@ -45,6 +50,12 @@ impl Instruction {
             6 => Self::CloseUser {},
 
             7 => Self::FinalUnstake {},
+
+            8 => Self::UpdateRates {
+                rewards_per_slot: Self::unpack_to_u64(&input[1..9])?,
+                max_reward_rate: Self::unpack_to_u64(&input[9..17])?,
+                min_reward_rate: Self::unpack_to_u64(&input[17..25])?,
+            },
 
             _ => return Err(InvalidInstruction.into()),
         })
