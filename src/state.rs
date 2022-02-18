@@ -38,6 +38,7 @@ pub struct User {
     pub nonce: u8,
     pub claim_timeout_date: i64,
 
-    pub weights: (f64, u64), // {user_weighted_stake, user_weighted_epoch_id}
+    pub user_weighted_epoch_id: u64,
+    pub user_weighted_stake: f64,
     pub balance_your_staked: u64,
 }

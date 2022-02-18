@@ -10,6 +10,7 @@ spl-token = {version = "3.2.0", features = ["no-entrypoint"]}
 arrayref = "0.3.6"
 borsh = "0.9.1"
 bs58 = "0.4.0"
+time = "0.3.7"
 
 [features]
 no-entrypoint = []

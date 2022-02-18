@@ -1,4 +1,3 @@
-use std::borrow::BorrowMut;
 use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
@@ -120,21 +119,19 @@ pub fn process_stake(
         ],
     )?;
 
-    let epoch_start_timestamp = Clock::get()?.epoch_start_timestamp as f64;
-    let current_time_timestamp = Clock::get()?.unix_timestamp as f64;
-
-    let (mut user_weighted_stake, mut user_weighted_epoch_id) = &user_storage_data.weights;
-    user_weighted_stake = (current_time_timestamp - epoch_start_timestamp) / EPOCH_LENGTH as f64;
-    user_weighted_epoch_id = Clock::get()?.slot;
-
-    msg!("1: {:?}", user_storage_data.weights);
-
-    return Err(CustomError::AccountOwnerShouldBeTokenProgram.into());
-
     user_storage_data.balance_your_staked = user_storage_data
         .balance_your_staked
         .checked_add(amount_to_deposit)
         .ok_or(CustomError::AmountOverflow)?;
+
+    let epoch_start_timestamp = Clock::get()?.epoch_start_timestamp as f64;
+    let current_time_timestamp = Clock::get()?.unix_timestamp as f64;
+    let user_stake_balance = user_storage_data.balance_your_staked as f64;
+
+    user_storage_data.user_weighted_stake = (user_stake_balance
+        * ((current_time_timestamp - epoch_start_timestamp) / (EPOCH_LENGTH as f64)));
+    user_storage_data.user_weighted_epoch_id = Clock::get()?.slot;
+
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]
